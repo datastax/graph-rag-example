@@ -46,8 +46,9 @@ class ChainManager:
             })
         traversal_retriever = graph_vector_store.as_retriever(
             search_type="traversal", search_kwargs={
-                "k": 1, 
-                "depth": 1
+                "k": 10, 
+                "depth": 1,
+                "score_threshold": 0.2,
             })
 
         # Set up chains
@@ -67,7 +68,11 @@ def main():
         urls = [
             "https://python.langchain.com/v0.2/docs/integrations/providers/astradb/",
             "https://docs.datastax.com/en/astra/home/astra.html",
-            "https://hitchhikersguidetoearth.fandom.com/wiki/42",
+            "https://github.com/langflow-ai/langflow",
+            "https://www.langchain.com/",
+            "https://docs.langflow.org/integrations-langsmith",
+            "https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores.html",
+            "https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores/langchain_community.graph_vectorstores.cassandra.CassandraGraphVectorStore.html",
         ]
 
         # Load and process documents
@@ -110,4 +115,4 @@ def compare_results(question):
 
 if __name__ == "__main__":
     main()
-    compare_results("What is the answer to the universe?")
+    compare_results("How do I setup a graph vector store using Astra?")
