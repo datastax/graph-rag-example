@@ -6,9 +6,20 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.graph_vectorstores import CassandraGraphVectorStore
 from langchain_community.document_transformers import Html2TextTransformer
+from colorama import Style, init
+
+from config import (
+    logger,
+    openai_api_key,
+    astra_db_id,
+    astra_token,
+    ASCII_ART
+)
 from langchain_utils import find_and_log_links, use_as_document_extractor
 from utils import format_docs, ANSWER_PROMPT
-from config import logger, openai_api_key, astra_db_id, astra_token, ASCII_ART
+
+# Initialize colorama
+init(autoreset=True)
 
 print(ASCII_ART)
 
@@ -56,6 +67,7 @@ def main():
         urls = [
             "https://python.langchain.com/v0.2/docs/integrations/providers/astradb/",
             "https://docs.datastax.com/en/astra/home/astra.html",
+            "https://hitchhikersguidetoearth.fandom.com/wiki/42",
         ]
 
         # Load and process documents
@@ -77,3 +89,25 @@ def main():
 
     except Exception as e:
         logger.error("An error occurred: %s", e)
+
+
+def compare_results(question):
+    print(Style.BRIGHT + "\nQuestion:")
+    print(Style.NORMAL + question)
+
+    # Initialize ChainManager and set up chains
+    chain_manager = ChainManager()
+    chain_manager.setup_chains()
+    
+    output_answer = chain_manager.similarity_chain.invoke(question)
+    print(Style.BRIGHT + "\n\nVector Similarity Result:")
+    print(Style.NORMAL + output_answer.content)
+
+    output_answer = chain_manager.traversal_chain.invoke(question)
+    print(Style.BRIGHT + "\n\nGRAPH Traversal Result:")
+    print(Style.NORMAL + output_answer.content)
+
+
+if __name__ == "__main__":
+    main()
+    compare_results("What is the answer to the universe?")
