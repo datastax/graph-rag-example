@@ -1,5 +1,5 @@
 # GraphRAG Example App
-An example application that demonstrates how to use LangChain's graph vector stores to add structured data to RAG (Retrieval-Augmented Generation) applications. The app scrapes content from specified URLs, processes the content, and performs vector similarity and graph traversal searches.
+An example application that demonstrates how to use LangChain's [graph_vectorstores](https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores.html#) and [CassandraGraphVectorStore](https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores/langchain_community.graph_vectorstores.cassandra.CassandraGraphVectorStore.html) to add structured data to RAG (Retrieval-Augmented Generation) applications. The app scrapes content from specified URLs, processes the content, and performs vector similarity and graph traversal searches.
 
 ```sh
   ____                 _     ____      _    ____ 
@@ -31,7 +31,7 @@ An example application that demonstrates how to use LangChain's graph vector sto
 	```
 
 4. **Set up the environment variables**:
-	- Copy the [`.env.example`](./.env.example") file to `.env`:
+	- Copy the [`.env.example`](.env.example) file to `.env`:
 	  ```sh
 	  cp .env.example .env
 	  ```
