@@ -1,4 +1,4 @@
-# GraphRAG Example App
+# 🚀 GraphRAG Example App
 An example application that demonstrates how to use LangChain's [graph_vectorstores](https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores.html#) and [CassandraGraphVectorStore](https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores/langchain_community.graph_vectorstores.cassandra.CassandraGraphVectorStore.html) to add structured data to RAG (Retrieval-Augmented Generation) applications. The app scrapes content from specified URLs, processes the content, and performs vector similarity and graph traversal searches.
 
 ```sh
@@ -11,7 +11,7 @@ An example application that demonstrates how to use LangChain's [graph_vectorsto
                         *no graph database needed!!!
 ```
 
-## Installation
+## 📦 Installation
 
 1. **Clone the repository**:
 	```sh
@@ -37,7 +37,7 @@ An example application that demonstrates how to use LangChain's [graph_vectorsto
 	  ```
 	- Fill in the required environment variables in the `.env` file.
 
-## Launch the App
+## 🚀 Launch the App
 
 1. **Run the main script**:
 	```sh
@@ -46,7 +46,7 @@ An example application that demonstrates how to use LangChain's [graph_vectorsto
 
 This will start the application, scrape the specified URLs, process the content, and perform vector similarity and graph traversal searches.
 
-## License
+## 📜 License
 
 This project is licensed under the MIT License.
 
