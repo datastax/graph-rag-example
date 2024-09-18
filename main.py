@@ -15,7 +15,13 @@ from config import (
     astra_token,
     ASCII_ART
 )
-from langchain_utils import find_and_log_links, use_as_document_extractor
+from langchain_utils import (
+    #use_as_document_extractor,
+    find_and_log_links,
+    use_link_extractor_transformer,
+    #use_keybert_extractor,
+    use_keybert_extract_one
+)
 from utils import format_docs, ANSWER_PROMPT
 
 # Initialize colorama
@@ -66,19 +72,20 @@ class ChainManager:
 def main():
     try:
         urls = [
-            "https://python.langchain.com/v0.2/docs/integrations/providers/astradb/",
-            "https://docs.datastax.com/en/astra/home/astra.html",
-            "https://github.com/langflow-ai/langflow",
-            "https://www.langchain.com/",
-            "https://docs.langflow.org/integrations-langsmith",
-            "https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores.html",
-            "https://python.langchain.com/v0.2/api_reference/community/graph_vectorstores/langchain_community.graph_vectorstores.cassandra.CassandraGraphVectorStore.html",
+            "https://www.themoviedb.org/movie/upcoming",
+            "https://www.themoviedb.org/movie/698687-transformers-one",
+            "https://www.themoviedb.org/movie/1087822-hellboy-the-crooked-man",
+            "https://www.themoviedb.org/movie/1164355-lembayung",
+            "https://www.themoviedb.org/movie/978796-bagman",
         ]
 
         # Load and process documents
         loader = AsyncHtmlLoader(urls)
         raw_documents = loader.load()
-        use_as_document_extractor(raw_documents)
+        #use_as_document_extractor(raw_documents)
+        use_link_extractor_transformer(raw_documents)
+        use_keybert_extract_one(raw_documents)
+        #use_keybert_extractor(raw_documents)
         find_and_log_links(raw_documents)
 
         # Transform documents to text
@@ -115,4 +122,4 @@ def compare_results(question):
 
 if __name__ == "__main__":
     main()
-    compare_results("How do I setup a graph vector store using Astra?")
+    compare_results("What are the latest upcoming movies, their release dates, and URLs?")

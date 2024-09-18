@@ -52,6 +52,15 @@ def use_link_extractor_transformer(documents):
     return documents
 
 
+def use_keybert_extract_one(documents):
+    keyword_extractor = KeybertLinkExtractor()
+
+    for document in documents:
+        links = keyword_extractor.extract_one(document)
+        add_links(document, links)
+    return documents
+
+
 def use_keybert_extractor(documents):
     transformer = LinkExtractorTransformer([KeybertLinkExtractor()])
     documents = transformer.transform_documents(documents)
