@@ -1,3 +1,4 @@
+import asyncio
 import cassio
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
@@ -6,28 +7,22 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import AsyncHtmlLoader
 from langchain_community.graph_vectorstores import CassandraGraphVectorStore
 from langchain_community.document_transformers import Html2TextTransformer
-from colorama import Style, init
 
 from config import (
     logger,
     openai_api_key,
     astra_db_id,
-    astra_token,
-    ASCII_ART
+    astra_token
 )
+
 from langchain_utils import (
-    #use_as_document_extractor,
+    use_as_document_extractor,
     find_and_log_links,
-    use_link_extractor_transformer,
+    #use_link_extractor_transformer,
     #use_keybert_extractor,
-    use_keybert_extract_one
+    #use_keybert_extract_one
 )
 from utils import format_docs, ANSWER_PROMPT
-
-# Initialize colorama
-init(autoreset=True)
-
-print(ASCII_ART)
 
 # Initialize embeddings and LLM using OpenAI
 embeddings = OpenAIEmbeddings(api_key=openai_api_key)
@@ -39,11 +34,26 @@ cassio.init(database_id=astra_db_id, token=astra_token)
 graph_vector_store = CassandraGraphVectorStore(embeddings)
 
 class ChainManager:
+    """
+    Manages the setup and configuration of similarity and traversal chains
+    for retrieving and processing documents using a graph vector store.
+    """
+
     def __init__(self):
+        """
+        Initializes the ChainManager with placeholders for similarity and traversal chains.
+        """
         self.similarity_chain = None
         self.traversal_chain = None
 
     def setup_chains(self):
+        """
+        Sets up the similarity and traversal chains using the graph vector store.
+        
+        The similarity chain retrieves documents based on vector similarity,
+        while the traversal chain retrieves documents based on graph traversal.
+        Both chains format the retrieved documents and use a language model to generate responses.
+        """
         # Set up retrievers
         similarity_retriever = graph_vector_store.as_retriever(
             search_kwargs={
@@ -82,9 +92,9 @@ def main():
         # Load and process documents
         loader = AsyncHtmlLoader(urls)
         raw_documents = loader.load()
-        #use_as_document_extractor(raw_documents)
-        use_link_extractor_transformer(raw_documents)
-        use_keybert_extract_one(raw_documents)
+        use_as_document_extractor(raw_documents)
+        #use_link_extractor_transformer(raw_documents)
+        #use_keybert_extract_one(raw_documents)
         #use_keybert_extractor(raw_documents)
         find_and_log_links(raw_documents)
 
@@ -103,23 +113,27 @@ def main():
         logger.error("An error occurred: %s", e)
 
 
-def compare_results(question):
-    print(Style.BRIGHT + "\nQuestion:")
-    print(Style.NORMAL + question)
-
-    # Initialize ChainManager and set up chains
-    chain_manager = ChainManager()
-    chain_manager.setup_chains()
+async def get_similarity_result(chain_manager, question):
+    """
+    Gets the result from the similarity chain for a given question.
     
-    output_answer = chain_manager.similarity_chain.invoke(question)
-    print(Style.BRIGHT + "\n\nVector Similarity Result:")
-    print(Style.NORMAL + output_answer.content)
+    Args:
+        chain_manager (ChainManager): The chain manager instance.
+        question (str): The question to be answered by the chain.
+    """
+    return chain_manager.similarity_chain.invoke(question).content
 
-    output_answer = chain_manager.traversal_chain.invoke(question)
-    print(Style.BRIGHT + "\n\nGRAPH Traversal Result:")
-    print(Style.NORMAL + output_answer.content)
+
+async def get_traversal_result(chain_manager, question):
+    """
+    Gets the result from the traversal chain for a given question.
+    
+    Args:
+        chain_manager (ChainManager): The chain manager instance.
+        question (str): The question to be answered by the chain.
+    """
+    return chain_manager.traversal_chain.invoke(question).content
 
 
 if __name__ == "__main__":
     main()
-    compare_results("What are the latest upcoming movies, their release dates, and URLs?")

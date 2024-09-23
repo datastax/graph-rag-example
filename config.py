@@ -10,17 +10,6 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 coloredlogs.install(level='DEBUG', logger=logger)
 
-# ASCII art to be logged at the start of the app
-ASCII_ART = """
-  ____                 _     ____      _    ____ 
- / ___|_ __ __ _ _ __ | |__ |  _ \    / \  / ___|
-| |  _| '__/ _` | '_ \| '_ \| |_) |  / _ \| |  _ 
-| |_| | | | (_| | |_) | | | |  _ <  / ___ \ |_| |
- \____|_|  \__,_| .__/|_| |_|_| \_\/_/   \_\____|
-                |_|                                           
-                        *no graph database needed!!!
-"""
-
 # Initialize embeddings and LLM using OpenAI
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
