@@ -63,7 +63,7 @@ class ChainManager:
             search_type="traversal", search_kwargs={
                 "k": 10, 
                 "depth": 1,
-                "score_threshold": 0.2,
+                "score_threshold": 0.5,
             })
 
         # Set up chains

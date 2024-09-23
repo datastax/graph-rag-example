@@ -42,39 +42,50 @@ app.layout = html.Div([
 
 @app.callback(
     [Output("similarity-result", "children"),
-     Output("traversal-result", "children"),
-     Output("similarity-time", "children"),
+     Output("similarity-time", "children")],
+    [Input("submit-button", "n_clicks")],
+    [State("question-input", "value")]
+)
+def update_similarity_result(n_clicks, question):
+    if n_clicks > 0:
+        async def fetch_similarity_result(chain_manager, question):
+            start_time = time.time()
+            result = await get_similarity_result(chain_manager, question)
+            elapsed_time = time.time() - start_time
+            return result, elapsed_time
+
+        chain_manager = ChainManager()
+        chain_manager.setup_chains()
+        similarity_result, similarity_elapsed_time = asyncio.run(fetch_similarity_result(chain_manager, question))
+
+        similarity_time = f"Elapsed time: {similarity_elapsed_time:.2f} seconds"
+        return similarity_result, similarity_time
+    return "", ""
+
+@app.callback(
+    [Output("traversal-result", "children"),
      Output("traversal-time", "children"),
      Output("submit-button", "className")],
     [Input("submit-button", "n_clicks")],
     [State("question-input", "value")]
 )
-def update_output(n_clicks, question):
+def update_traversal_result(n_clicks, question):
     if n_clicks > 0:
-        # Clear the result fields to reset their size
-        similarity_result = ""
-        traversal_result = ""
-        similarity_time = ""
-        traversal_time = ""
-
-        async def fetch_results():
-            chain_manager = ChainManager()
-            chain_manager.setup_chains()
+        async def fetch_traversal_result(chain_manager, question):
             start_time = time.time()
-            similarity_result, traversal_result = await asyncio.gather(
-                get_similarity_result(chain_manager, question),
-                get_traversal_result(chain_manager, question)
-            )
+            result = await get_traversal_result(chain_manager, question)
             elapsed_time = time.time() - start_time
-            return similarity_result, traversal_result, elapsed_time
+            return result, elapsed_time
 
-        similarity_result, traversal_result, elapsed_time = asyncio.run(fetch_results())
+        chain_manager = ChainManager()
+        chain_manager.setup_chains()
+        traversal_result, traversal_elapsed_time = asyncio.run(fetch_traversal_result(chain_manager, question))
 
+        traversal_time = f"Elapsed time: {traversal_elapsed_time:.2f} seconds"
         button_class = "button button-clicked"
-        similarity_time = f"Elapsed time: {elapsed_time:.2f} seconds"
-        traversal_time = f"Elapsed time: {elapsed_time:.2f} seconds"
-        return similarity_result, traversal_result, similarity_time, traversal_time, button_class
-    return "", "", "", "", "button"
+        return traversal_result, traversal_time, button_class
+    return "", "", "button"
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)
