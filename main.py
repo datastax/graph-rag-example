@@ -1,4 +1,3 @@
-import asyncio
 import cassio
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
@@ -20,7 +19,7 @@ from langchain_utils import (
     find_and_log_links,
     #use_link_extractor_transformer,
     #use_keybert_extractor,
-    #use_keybert_extract_one
+    use_keybert_extract_one
 )
 from utils import format_docs, ANSWER_PROMPT
 
@@ -94,7 +93,7 @@ def main():
         raw_documents = loader.load()
         use_as_document_extractor(raw_documents)
         #use_link_extractor_transformer(raw_documents)
-        #use_keybert_extract_one(raw_documents)
+        use_keybert_extract_one(raw_documents)
         #use_keybert_extractor(raw_documents)
         find_and_log_links(raw_documents)
 

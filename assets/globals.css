@@ -1,0 +1,78 @@
+/* globals.css */
+
+body {
+    background-color: #121212;
+    min-height: 100vh;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+    color: white;
+    padding: 10px;
+}
+
+.input-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.input-field {
+    width: 80%;
+    padding: 10px;
+    border-radius: 10px;
+    margin-right: 10px;
+}
+
+.button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.button-clicked {
+    background-color: #3e8e41;
+}
+
+.results-section {
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+}
+
+.result-container {
+    width: 48%;
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 2%;
+    background-color: #1E1E1E;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.result-container:last-child {
+    margin-right: 0;
+}
+
+.result-title {
+    color: white;
+}
+
+.result-content {
+    white-space: pre-wrap;
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    min-height: 100px;
+}
+
+.result-time {
+    color: white;
+    padding-top: 10px;
+}
