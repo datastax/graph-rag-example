@@ -21,20 +21,24 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# Set debug mode, `True` will generate graphs in multiple
+# formats (dot, png, text) for use in analyzing results
+DEBUG_MODE=False
+
 # Configure logger
-logger = logging.getLogger(__name__)
-coloredlogs.install(level='DEBUG', logger=logger)
+LOGGER = logging.getLogger(__name__)
+coloredlogs.install(level='DEBUG', logger=LOGGER)
 
 # Initialize embeddings and LLM using OpenAI
-openai_api_key = os.getenv("OPENAI_API_KEY")
-if not openai_api_key:
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if not OPENAI_API_KEY:
     raise ValueError("The OPENAI_API_KEY environment variable is not set.")
 
 # Initialize Astra connection using Cassio
-astra_db_id = os.getenv("ASTRA_DB_DATABASE_ID")
-astra_token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
-astra_endpoint = os.getenv("ASTRA_DB_ENDPOINT")
-if not all([astra_db_id, astra_token, astra_endpoint]):
+ASTRA_DB_ID = os.getenv("ASTRA_DB_DATABASE_ID")
+ASTRA_TOKEN = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
+ASTRA_ENDPOINT = os.getenv("ASTRA_DB_ENDPOINT")
+if not all([ASTRA_DB_ID, ASTRA_TOKEN, ASTRA_ENDPOINT]):
     raise ValueError("Astra DB credentials must be set.")
 
 ANSWER_PROMPT = (

@@ -1,6 +1,10 @@
+"""
+This module provides functions for visualizing document graphs using GraphViz and AnyTree.
+It includes functions to render graphs, generate links tables, and visualize text-based graphs.
+"""
+
 import re
 from typing import TYPE_CHECKING, Iterable, Optional, Dict, Tuple
-from tabulate import tabulate
 from anytree import Node, RenderTree, LoopError
 from langchain_core.documents import Document
 from langchain_community.graph_vectorstores.links import get_links
@@ -14,9 +18,9 @@ _EDGE_DIRECTION = {
     "bidir": "both",
 }
 
-_WORD_RE = re.compile("\s*\S+")
+_WORD_RE = re.compile(r"\s*\S+")
 
-COLORS = {
+_COLORS = {
     True: "green",
     False: "red",
     # Depth0, Graph
@@ -31,10 +35,29 @@ COLORS = {
 
 
 def _escape_id(id: str) -> str:
+    """
+    Escapes the given ID by replacing colons with underscores.
+
+    Parameters:
+    id (str): The ID to escape.
+
+    Returns:
+    str: The escaped ID.
+    """
     return id.replace(":", "_")
 
 
 def _split_prefix(s: str, max_chars: int = 50) -> str:
+    """
+    Splits the given string into a prefix of at most max_chars characters.
+
+    Parameters:
+    s (str): The string to split.
+    max_chars (int): The maximum number of characters in the prefix.
+
+    Returns:
+    str: The prefix of the string.
+    """
     words = _WORD_RE.finditer(s)
 
     split = min(len(s), max_chars)
@@ -56,24 +79,21 @@ def render_graphviz(
     node_colors: Optional[Dict[str, Optional[str]]] = None,
     skip_tags: Iterable[Tuple[str, str]] = (),
 ) -> "graphviz.Digraph":
-    """Render a collection of GraphVectorStore documents to GraphViz format.
-    Args:
-        documents: The documents to render.
-        engine: GraphViz layout engine to use. `None` uses the default.
-        node_color: Default node color.
-        node_colors: Dictionary specifying colors of specific nodes. Useful for
-            emphasizing nodes that were selected by MMR, or differ from other
-            results.
-        skip_tags: Set of tags to skip when rendering the graph. Specified as
-            tuples containing the kind and tag.
+    """
+    Render a collection of GraphVectorStore documents to GraphViz format.
+
+    Parameters:
+    documents (Iterable[Document]): The documents to render.
+    engine (Optional[str]): GraphViz layout engine to use. `None` uses the default.
+    node_color (Optional[str]): Default node color.
+    node_colors (Optional[Dict[str, Optional[str]]]): Dictionary specifying colors of specific nodes.
+    skip_tags (Iterable[Tuple[str, str]]): Set of tags to skip when rendering the graph.
+
     Returns:
-        The "graphviz.Digraph" representing the nodes. May be printed to source,
-        or rendered using `dot`.
+    graphviz.Digraph: The GraphViz Digraph representing the nodes.
+
     Note:
-        To render the generated DOT source code, you also need to install Graphviz_
-        (`download page <https://www.graphviz.org/download/>`_,
-        `archived versions <https://www2.graphviz.org/Archive/stable/>`_,
-        `installation procedure for Windows <https://forum.graphviz.org/t/new-simplified-installation-procedure-on-windows/224>`_).
+    To render the generated DOT source code, you also need to install Graphviz.
     """
     if node_colors is None:
         node_colors = {}
@@ -130,31 +150,34 @@ def render_graphviz(
 
 
 def visualize_graphs(documents, output_path="graph"):
-    document_ids = { d.id for d in documents }
-    #left_ids = { d.id for d in left_results }
-    #right_ids = { d.id for d in right_results }
+    """
+    Visualizes a collection of documents as a graph and saves it to a file.
+
+    Parameters:
+    documents (list): List of documents to visualize.
+    output_path (str): Path to save the output graph image.
+
+    Returns:
+    str: The path to the rendered graph image.
+    """
+    document_ids = {d.id for d in documents}
 
     colors = {
-      d.id: COLORS[(d.id in document_ids)] for d in documents
+        d.id: _COLORS[(d.id in document_ids)] for d in documents
     }
-    #all_documents = left_results + [d for d in right_results if d.id not in left_ids]
-    #colors = {
-    #  d.id: COLORS[(d.id in left_ids, d.id in right_ids)] for d in all_documents
-    #}
 
     digraph = render_graphviz(documents, engine="sfdp", node_colors=colors)
     return digraph.render(output_path, format="png")
 
 
-
 def generate_links_table(documents, direction="bidir"):
     """
     Generates a table of links between documents.
-    
+
     Parameters:
     documents (list): List of documents to process.
     direction (str): Direction of the links to include ("bidir", "in", "out").
-    
+
     Returns:
     list: List of tuples representing the links.
     """
@@ -169,21 +192,27 @@ def generate_links_table(documents, direction="bidir"):
 
     # Filter links based on direction
     for source, tag, link_direction in all_links:
-        #print(f"\nSource: {source}, Tag: {tag}, Link Direction: {link_direction}")
         if direction == "bidir" and link_direction == "bidir":
-            #print(f"Checking for bidirectional links between {source} and {tag}")
             links_table.append((source, tag))
         elif direction == "out" and link_direction == "out":
-            #print(f"Checking for outgoing links from {source} to {tag}")
             links_table.append((source, tag))
         elif direction == "in" and link_direction == "in":
-            #print(f"Checking for incoming links to {source} from {tag}")
             links_table.append((tag, source))
 
     return links_table
 
 
-def visualize_graph_text(documents, direction="bidir") -> RenderTree:
+def visualize_graph_text(documents, direction="bidir") -> str:
+    """
+    Visualizes a collection of documents as a text-based tree structure.
+
+    Parameters:
+    documents (list): List of documents to visualize.
+    direction (str): Direction of the links to include ("bidir", "in", "out").
+
+    Returns:
+    str: The combined tree structure as a string.
+    """
     print("\n\nVisualizing Text Graph...")
 
     # Use the updated generate_links_table function
@@ -199,12 +228,11 @@ def visualize_graph_text(documents, direction="bidir") -> RenderTree:
         # Ensure both nodes exist in the dictionary
         if doc_from not in nodes:
             nodes[doc_from] = Node(doc_from)
-        if (doc_to not in nodes):
+        if doc_to not in nodes:
             nodes[doc_to] = Node(doc_to)
         # Check for loops before setting the parent
         try:
             nodes[doc_to].parent = nodes[doc_from]
-            #print(f"{doc_from} is parent of {doc_to}")
         except LoopError as e:
             print(f"Skipping loop creation: {e}")
 
@@ -216,8 +244,8 @@ def visualize_graph_text(documents, direction="bidir") -> RenderTree:
     print("\nTree Structure:")
     for root_node in root_nodes:
         tree_str = ""
-        for pre, fill, node in RenderTree(root_node):
-            tree_str += "%s%s\n" % (pre, node.name)
+        for pre, _, node in RenderTree(root_node):
+            tree_str += f"{pre}{node.name}\n"
         rendered_trees.append(tree_str)
         print(tree_str)
 

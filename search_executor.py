@@ -16,14 +16,14 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.graph_vectorstores import CassandraGraphVectorStore
-from util.config import openai_api_key, astra_db_id, astra_token, ANSWER_PROMPT
+from util.config import OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN, ANSWER_PROMPT
 
 # Initialize embeddings and LLM using OpenAI
-embeddings = OpenAIEmbeddings(api_key=openai_api_key)
+embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 llm = ChatOpenAI(temperature=1, model_name="gpt-4o-mini")
 
 # Initialize Astra connection using Cassio
-cassio.init(database_id=astra_db_id, token=astra_token)
+cassio.init(database_id=ASTRA_DB_ID, token=ASTRA_TOKEN)
 knowledge_store = CassandraGraphVectorStore(embeddings)
 
 class ChainManager:

@@ -1,7 +1,9 @@
-import logging
+"""
+This script initializes and runs a Dash web application for comparing similarity and MMR results.
+It includes functions for fetching results asynchronously and updating the UI with the results.
+"""
 import time
 import asyncio
-import coloredlogs
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -15,10 +17,7 @@ from util.visualization import (
     visualize_graph_text,
     visualize_graphs
 )
-
-# Configure logger
-logger = logging.getLogger(__name__)
-coloredlogs.install(level='DEBUG', logger=logger)
+from util.config import LOGGER, DEBUG_MODE
 
 # ASCII art to be logged at the start of the app
 ASCII_ART = """
@@ -30,7 +29,7 @@ ASCII_ART = """
                 |_|                                           
                         *no graph database needed!!!
 """
-logger.info(ASCII_ART)
+LOGGER.info(ASCII_ART)
 
 # Initialize the Dash app
 external_stylesheets = ['/assets/globals.css']
@@ -52,7 +51,7 @@ app.layout = html.Div([
 
     html.Div([
         html.Div([
-            html.H2("Vector Similarity Result", className="result-title"),
+            html.H2("Normal RAG", className="result-title"),
             dls.Hash(id="similarity-spinner", children=[
                 dcc.Markdown(id="similarity-result", className="result-content"),
                 html.Div(id="similarity-time", className="result-time"),
@@ -61,7 +60,7 @@ app.layout = html.Div([
         ], className="result-container"),
 
         html.Div([
-            html.H2("MMR Result", className="result-title"),
+            html.H2("Graph RAG", className="result-title"),
             dls.Hash(id="mmr-spinner", children=[
                 dcc.Markdown(id="mmr-result", className="result-content"),
                 html.Div(id="mmr-time", className="result-time"),
@@ -73,6 +72,16 @@ app.layout = html.Div([
 
 
 async def fetch_similarity_result(chain_manager, question):
+    """
+    Fetches the similarity result for a given question using the ChainManager.
+
+    Parameters:
+    chain_manager (ChainManager): The ChainManager instance to use for fetching the result.
+    question (str): The question to fetch the similarity result for.
+
+    Returns:
+    tuple: A tuple containing the result, usage metadata, and elapsed time.
+    """
     start_time = time.time()
     result, usage_metadata = await get_similarity_result(chain_manager, question)
     elapsed_time = time.time() - start_time
@@ -80,6 +89,16 @@ async def fetch_similarity_result(chain_manager, question):
 
 
 async def fetch_mmr_result(chain_manager, question):
+    """
+    Fetches the MMR result for a given question using the ChainManager.
+
+    Parameters:
+    chain_manager (ChainManager): The ChainManager instance to use for fetching the result.
+    question (str): The question to fetch the MMR result for.
+
+    Returns:
+    tuple: A tuple containing the result, usage metadata, and elapsed time.
+    """
     start_time = time.time()
     result, usage_metadata = await get_mmr_result(chain_manager, question)
     elapsed_time = time.time() - start_time
@@ -94,6 +113,16 @@ async def fetch_mmr_result(chain_manager, question):
     [State("question-input", "value")]
 )
 def update_similarity_results(n_clicks, question):
+    """
+    Updates the similarity results in the UI when the submit button is clicked.
+
+    Parameters:
+    n_clicks (int): The number of times the submit button has been clicked.
+    question (str): The question input by the user.
+
+    Returns:
+    tuple: A tuple containing the similarity result, elapsed time, and usage metadata.
+    """
     if n_clicks > 0:
         chain_manager = ChainManager()
         chain_manager.setup_chains()
@@ -119,6 +148,16 @@ def update_similarity_results(n_clicks, question):
     [State("question-input", "value")]
 )
 def update_mmr_results(n_clicks, question):
+    """
+    Updates the MMR results in the UI when the submit button is clicked.
+
+    Parameters:
+    n_clicks (int): The number of times the submit button has been clicked.
+    question (str): The question input by the user.
+
+    Returns:
+    tuple: A tuple containing the MMR result, elapsed time, and usage metadata.
+    """
     if n_clicks > 0:
         chain_manager = ChainManager()
         chain_manager.setup_chains()
@@ -127,8 +166,10 @@ def update_mmr_results(n_clicks, question):
         )
 
         visualize_result = chain_manager.mmr_retriever.invoke(question)
-        visualize_graphs(visualize_result)
-        visualize_graph_text(visualize_result, direction="bidir")
+
+        if DEBUG_MODE:
+            visualize_graphs(visualize_result)
+            visualize_graph_text(visualize_result, direction="bidir")
 
         mmr_time = (
             f"Elapsed time: {mmr_elapsed_time:.2f} seconds "
@@ -141,4 +182,4 @@ def update_mmr_results(n_clicks, question):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=DEBUG_MODE)

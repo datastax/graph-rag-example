@@ -1,3 +1,9 @@
+"""
+This script loads, processes, and visualizes documents from a list of URLs.
+It includes functions for fetching URLs, cleaning and preprocessing documents,
+and adding them to a graph vector store.
+"""
+
 import os
 import json
 import cassio
@@ -11,19 +17,28 @@ from langchain_community.graph_vectorstores.extractors import (
     KeybertLinkExtractor,
     GLiNERLinkExtractor,
 )
-from util.config import logger, openai_api_key, astra_db_id, astra_token
+from util.config import LOGGER, OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN
 from util.scrub import clean_and_preprocess_documents
 from util.visualization import visualize_graph_text
 
 # Initialize embeddings and LLM using OpenAI
-embeddings = OpenAIEmbeddings(api_key=openai_api_key)
+embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
 # Initialize Astra connection using Cassio
-cassio.init(database_id=astra_db_id, token=astra_token)
+cassio.init(database_id=ASTRA_DB_ID, token=ASTRA_TOKEN)
 knowledge_store = CassandraGraphVectorStore(embeddings)
 
 
 def get_urls(num_items=10):
+    """
+    Fetches a list of URLs from a JSON file containing movie data.
+
+    Parameters:
+    num_items (int): The maximum number of URLs to fetch.
+
+    Returns:
+    list: A list of URLs.
+    """
     urls = []
 
     # Load movies from JSON file and add them to the list of URLs
@@ -42,6 +57,13 @@ def get_urls(num_items=10):
 
 
 def main():
+    """
+    Main function to load, process, and visualize documents.
+
+    This function loads documents from URLs, transforms and cleans them,
+    splits them into chunks, and adds them to a graph vector store.
+    It also visualizes the documents as a text-based graph.
+    """
     try:
         # Load and process documents
         loader = AsyncHtmlLoader(get_urls(num_items=10))
@@ -73,7 +95,8 @@ def main():
         visualize_graph_text(documents)
 
     except Exception as e:
-        logger.error("An error occurred: %s", e)
+        LOGGER.error("An error occurred: %s", e)
+
 
 if __name__ == "__main__":
     main()
