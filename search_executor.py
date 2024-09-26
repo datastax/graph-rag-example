@@ -20,7 +20,7 @@ from util.config import openai_api_key, astra_db_id, astra_token, ANSWER_PROMPT
 
 # Initialize embeddings and LLM using OpenAI
 embeddings = OpenAIEmbeddings(api_key=openai_api_key)
-llm = ChatOpenAI(temperature=1, model_name="gpt-3.5-turbo-0125")
+llm = ChatOpenAI(temperature=1, model_name="gpt-4o-mini")
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=astra_db_id, token=astra_token)
@@ -53,16 +53,16 @@ class ChainManager:
         """
         self.similarity_retriever = knowledge_store.as_retriever(
             search_type="similarity", search_kwargs={
-                "k": 5, # Return the top results
+                "k": 10, # Return the top results
                 "depth": 0,
             })
 
         self.mmr_retriever = knowledge_store.as_retriever(
             search_type="mmr_traversal", search_kwargs={
                 "k": 10, # top k results
-                "depth": 1,
+                "depth": 3,
                 "lambda_mult": 0.25, # 0 = more diverse, 1 = more relevant
-                "fetch_k": 50
+                #"fetch_k": 50
             })
 
         self.similarity_chain = (

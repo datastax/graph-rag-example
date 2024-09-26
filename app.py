@@ -11,7 +11,10 @@ from search_executor import (
     get_similarity_result,
     get_mmr_result
 )
-from util.visualization import visualize_graph_text
+from util.visualization import (
+    visualize_graph_text,
+    visualize_graphs
+)
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -122,6 +125,10 @@ def update_mmr_results(n_clicks, question):
         mmr_result, mmr_usage_metadata, mmr_elapsed_time = asyncio.run(
             fetch_mmr_result(chain_manager, question)
         )
+
+        visualize_result = chain_manager.mmr_retriever.invoke(question)
+        visualize_graphs(visualize_result)
+        visualize_graph_text(visualize_result, direction="bidir")
 
         mmr_time = (
             f"Elapsed time: {mmr_elapsed_time:.2f} seconds "

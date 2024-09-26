@@ -41,6 +41,7 @@ ANSWER_PROMPT = (
     "The original question is given below."
     "This question has been used to retrieve information from a vector store."
     "The matching results are shown below."
+    "Only use context to answer the question."
     "Use the information in the results to answer the original question."
     "Give responses in pretty Markdown."
     "Original Question: {question}\n\n"
