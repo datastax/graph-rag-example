@@ -1,18 +1,3 @@
-"""
-This module sets up a Dash web application for comparing results from different search methods
-(vector similarity, graph traversal, and Maximal Marginal Relevance (MMR)).
-
-The application includes:
-- A text input field for users to enter a question.
-- A button to trigger the search and retrieve results.
-- Sections to display the results, elapsed time, and usage metadata for each search method.
-
-The main components of the module are:
-- Initialization of the Dash app and its layout.
-- Callback functions to handle the search requests and update the results on the web page.
-
-The application is run in debug mode when executed as the main module.
-"""
 import logging
 import time
 import asyncio
@@ -26,6 +11,7 @@ from search_executor import (
     get_similarity_result,
     get_mmr_result
 )
+from util.visualization import visualize_graph_text
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -48,7 +34,7 @@ external_stylesheets = ['/assets/globals.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
-    html.H1("Similarity vs Traversal vs MMR Comparison"),
+    html.H1("Similarity vs MMR Comparison"),
 
     html.Div([
         dcc.Input(
@@ -83,6 +69,20 @@ app.layout = html.Div([
 ])
 
 
+async def fetch_similarity_result(chain_manager, question):
+    start_time = time.time()
+    result, usage_metadata = await get_similarity_result(chain_manager, question)
+    elapsed_time = time.time() - start_time
+    return result, usage_metadata, elapsed_time
+
+
+async def fetch_mmr_result(chain_manager, question):
+    start_time = time.time()
+    result, usage_metadata = await get_mmr_result(chain_manager, question)
+    elapsed_time = time.time() - start_time
+    return result, usage_metadata, elapsed_time
+
+
 @app.callback(
     [Output("similarity-result", "children"),
      Output("similarity-time", "children"),
@@ -90,19 +90,8 @@ app.layout = html.Div([
     [Input("submit-button", "n_clicks")],
     [State("question-input", "value")]
 )
-def update_similarity_result(n_clicks, question):
-    """
-    Fetches and updates the similarity result, elapsed time, and usage metadata.
-        - n_clicks: Number of times the "Get Results" button has been clicked.
-        - question: The input question provided by the user.
-    """
+def update_similarity_results(n_clicks, question):
     if n_clicks > 0:
-        async def fetch_similarity_result(chain_manager, question):
-            start_time = time.time()
-            result, usage_metadata = await get_similarity_result(chain_manager, question)
-            elapsed_time = time.time() - start_time
-            return result, usage_metadata, elapsed_time
-
         chain_manager = ChainManager()
         chain_manager.setup_chains()
         similarity_result, similarity_usage_metadata, similarity_elapsed_time = asyncio.run(
@@ -115,7 +104,7 @@ def update_similarity_result(n_clicks, question):
         )
         similarity_usage_metadata_str = f"Usage Metadata: {similarity_usage_metadata}"
 
-        return similarity_result, similarity_time, similarity_usage_metadata_str
+        return (similarity_result, similarity_time, similarity_usage_metadata_str)
     return "", "", ""
 
 
@@ -126,19 +115,8 @@ def update_similarity_result(n_clicks, question):
     [Input("submit-button", "n_clicks")],
     [State("question-input", "value")]
 )
-def update_mmr_result(n_clicks, question):
-    """
-    Fetches and updates the MMR result, elapsed time, and usage metadata.
-        - n_clicks: Number of times the "Get Results" button has been clicked.
-        - question: The input question provided by the user.
-    """
+def update_mmr_results(n_clicks, question):
     if n_clicks > 0:
-        async def fetch_mmr_result(chain_manager, question):
-            start_time = time.time()
-            result, usage_metadata = await get_mmr_result(chain_manager, question)
-            elapsed_time = time.time() - start_time
-            return result, usage_metadata, elapsed_time
-
         chain_manager = ChainManager()
         chain_manager.setup_chains()
         mmr_result, mmr_usage_metadata, mmr_elapsed_time = asyncio.run(
@@ -151,8 +129,9 @@ def update_mmr_result(n_clicks, question):
         )
         mmr_usage_metadata_str = f"Usage Metadata: {mmr_usage_metadata}"
 
-        return mmr_result, mmr_time, mmr_usage_metadata_str
+        return (mmr_result, mmr_time, mmr_usage_metadata_str)
     return "", "", ""
+
 
 if __name__ == "__main__":
     app.run_server(debug=True)

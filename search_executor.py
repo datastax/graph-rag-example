@@ -20,12 +20,11 @@ from util.config import openai_api_key, astra_db_id, astra_token, ANSWER_PROMPT
 
 # Initialize embeddings and LLM using OpenAI
 embeddings = OpenAIEmbeddings(api_key=openai_api_key)
-llm = ChatOpenAI(temperature=1, model_name="gpt-4o-mini")
+llm = ChatOpenAI(temperature=1, model_name="gpt-3.5-turbo-0125")
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=astra_db_id, token=astra_token)
-
-graph_vector_store = CassandraGraphVectorStore(embeddings)
+knowledge_store = CassandraGraphVectorStore(embeddings)
 
 class ChainManager:
     """
@@ -35,6 +34,8 @@ class ChainManager:
     def __init__(self):
         self.similarity_chain = None
         self.mmr_chain = None
+        self.mmr_retriever = None
+        self.similarity_retriever = None
 
     def format_docs(self, docs):
         """
@@ -50,25 +51,27 @@ class ChainManager:
         while the traversal chain retrieves documents based on graph traversal.
         Both chains format the retrieved documents and use a language model to generate responses.
         """
-        similarity_retriever = graph_vector_store.as_retriever(
-            search_kwargs={
-                "k": 6 # Return the top results
+        self.similarity_retriever = knowledge_store.as_retriever(
+            search_type="similarity", search_kwargs={
+                "k": 5, # Return the top results
+                "depth": 0,
             })
-        mmr_retriever = graph_vector_store.as_retriever(
+
+        self.mmr_retriever = knowledge_store.as_retriever(
             search_type="mmr_traversal", search_kwargs={
-                "k": 6, # top k results
-                "depth": 3,
+                "k": 10, # top k results
+                "depth": 1,
                 "lambda_mult": 0.25, # 0 = more diverse, 1 = more relevant
                 "fetch_k": 50
             })
 
         self.similarity_chain = (
-            {"context": similarity_retriever | self.format_docs, "question": RunnablePassthrough()}
+            {"context": self.similarity_retriever | self.format_docs, "question": RunnablePassthrough()}
             | ChatPromptTemplate.from_messages([ANSWER_PROMPT])
             | llm
         )
         self.mmr_chain = (
-            {"context": mmr_retriever | self.format_docs, "question": RunnablePassthrough()}
+            {"context": self.mmr_retriever | self.format_docs, "question": RunnablePassthrough()}
             | ChatPromptTemplate.from_messages([ANSWER_PROMPT])
             | llm
         )

@@ -1,3 +1,5 @@
+import os
+import json
 import cassio
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -18,8 +20,7 @@ embeddings = OpenAIEmbeddings(api_key=openai_api_key)
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=astra_db_id, token=astra_token)
-
-graph_vector_store = CassandraGraphVectorStore(embeddings)
+knowledge_store = CassandraGraphVectorStore(embeddings)
 
 def main():
     try:
@@ -31,6 +32,19 @@ def main():
             "https://www.themoviedb.org/movie/978796-bagman",
         ]
 
+        # Load movies from JSON file and add them to the list of URLs
+        script_dir = os.path.dirname(__file__)  # Directory of the script
+        file_path = os.path.join(script_dir, 'assets/movies.json')
+        with open(file_path, encoding='utf-8') as user_file:
+            file_contents = user_file.read()
+
+        movies = json.loads(file_contents)
+        max_items = 10
+        for i, movie in enumerate(movies):
+            if i >= max_items:
+                break
+            urls.append("https://www.themoviedb.org/movie/" + str(movie.get('id')))
+
         # Load and process documents
         loader = AsyncHtmlLoader(urls)
         raw_documents = loader.load()
@@ -38,7 +52,7 @@ def main():
         transformer = LinkExtractorTransformer([
             HtmlLinkExtractor().as_document_extractor(),
             KeybertLinkExtractor(),
-            GLiNERLinkExtractor(["Title", "Genre", "Date", "Trailer"]),
+            #GLiNERLinkExtractor(["Title", "Genre", "Date", "Trailer"]),
         ])
         raw_documents = transformer.transform_documents(raw_documents)
         find_and_log_links(raw_documents)
@@ -48,11 +62,14 @@ def main():
         docs_transformed = html2text.transform_documents(raw_documents)
 
         # Split documents into chunks
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=1024, chunk_overlap=64)
+        text_splitter = RecursiveCharacterTextSplitter(
+            chunk_size=1024,
+            chunk_overlap=64
+        )
         documents = text_splitter.split_documents(docs_transformed)
 
         # Add documents to the graph vector store
-        graph_vector_store.add_documents(documents)
+        knowledge_store.add_documents(documents)
 
     except Exception as e:
         logger.error("An error occurred: %s", e)
