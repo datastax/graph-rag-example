@@ -66,7 +66,7 @@ def main():
     """
     try:
         # Load and process documents
-        loader = AsyncHtmlLoader(get_urls(num_items=10))
+        loader = AsyncHtmlLoader(get_urls(num_items=50))
         raw_documents = loader.load()
 
         # Continue with the existing transformation and visualization

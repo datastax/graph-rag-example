@@ -5,6 +5,7 @@ It includes functions for fetching results asynchronously and updating the UI wi
 import time
 import asyncio
 import dash
+import dash_bootstrap_components as dbc
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
 import dash_loading_spinners as dls
@@ -32,43 +33,116 @@ ASCII_ART = """
 LOGGER.info(ASCII_ART)
 
 # Initialize the Dash app
-external_stylesheets = ['/assets/globals.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-app.layout = html.Div([
-    html.H1("Similarity vs MMR Comparison"),
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col(html.H1("Similarity vs MMR Comparison"), className="mb-4")
+    ]),
 
-    html.Div([
-        dcc.Input(
-            id="question-input",
-            type="text",
-            value="",
-            placeholder="Ask me something",
-            className="input-field"
-        ),
-        html.Button("Get Results", id="submit-button", n_clicks=0, className="button"),
-    ], className="input-container"),
+    dbc.Row([
+        dbc.Col([
+            dbc.Input(
+                id="question-input",
+                type="text",
+                value="",
+                placeholder="Ask me something",
+                className="mb-2"
+            )
+        ], width=10),
+        dbc.Col([
+            dbc.Button("Get Results", id="submit-button", n_clicks=0, color="primary", className="mb-2")
+        ], width=2)
+    ], className="mb-4"),
 
-    html.Div([
-        html.Div([
+    dbc.Row([
+        dbc.Col([
             html.H2("Normal RAG", className="result-title"),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label("Num Results:", className="input-label"),
+                ], width=4),
+                dbc.Col([
+                    dbc.Input(
+                        id="k-input-normal",
+                        type="number",
+                        value=10,
+                        placeholder="num_results",
+                        className="mb-2"
+                    )
+                ], width=8)
+            ], className="mb-4"),
+
+            dbc.Row([
+                dbc.Col([
+                    html.Div(id="placeholder"),
+                ], width=8)
+            ], className="mb-4"),
+
             dls.Hash(id="similarity-spinner", children=[
                 dcc.Markdown(id="similarity-result", className="result-content"),
                 html.Div(id="similarity-time", className="result-time"),
                 html.Div(id="similarity-usage-metadata", className="usage-metadata")
             ], color="#4CAF50", speed_multiplier=1.5)
-        ], className="result-container"),
+        ], width=6, className="result-container"),
 
-        html.Div([
+        dbc.Col([
             html.H2("Graph RAG", className="result-title"),
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label("Num Results:", className="input-label"),
+                ], width=4),
+                dbc.Col([
+                    dbc.Input(
+                        id="k-input-graph",
+                        type="number",
+                        value=10,
+                        placeholder="num_results",
+                        className="mb-2"
+                    )
+                ], width=8)
+            ], className="mb-4"),
+
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label("Depth", className="input-label"),
+                ], width=4),
+                dbc.Col([
+                    dbc.Input(
+                        id="depth-input-graph",
+                        type="number",
+                        value=3,
+                        placeholder="depth",
+                        className="mb-2"
+                    )
+                ], width=8)
+            ], className="mb-4"),
+
+            dbc.Row([
+                dbc.Col([
+                    dbc.Label("Relevance", className="input-label"),
+                ], width=4),
+                dbc.Col([
+                    dcc.Slider(
+                        id="lambda-slider",
+                        min=0,
+                        max=1,
+                        step=0.01,
+                        value=0.25,
+                        marks={i / 10: str(i / 10) for i in range(0, 11)},
+                        className="slider"
+                    )
+                ], width=8)
+            ], className="mb-4"),
+
             dls.Hash(id="mmr-spinner", children=[
                 dcc.Markdown(id="mmr-result", className="result-content"),
                 html.Div(id="mmr-time", className="result-time"),
                 html.Div(id="mmr-usage-metadata", className="usage-metadata")
             ], color="#4CAF50", speed_multiplier=1.5)
-        ], className="result-container")
-    ], className="results-section")
-])
+        ], width=6, className="result-container")
+    ])
+], fluid=True)
 
 
 async def fetch_similarity_result(chain_manager, question):
@@ -110,22 +184,25 @@ async def fetch_mmr_result(chain_manager, question):
      Output("similarity-time", "children"),
      Output("similarity-usage-metadata", "children")],
     [Input("submit-button", "n_clicks")],
-    [State("question-input", "value")]
+    [State("question-input", "value"),
+     State("k-input-normal", "value")]
 )
-def update_similarity_results(n_clicks, question):
+def update_similarity_results(n_clicks, question, k):
     """
     Updates the similarity results in the UI when the submit button is clicked.
 
     Parameters:
     n_clicks (int): The number of times the submit button has been clicked.
     question (str): The question input by the user.
+    k (int): The number of top results to retrieve.
+    depth (int): The depth of the graph traversal.
 
     Returns:
     tuple: A tuple containing the similarity result, elapsed time, and usage metadata.
     """
     if n_clicks > 0:
         chain_manager = ChainManager()
-        chain_manager.setup_chains()
+        chain_manager.setup_chains(k=k, depth=0)
         similarity_result, similarity_usage_metadata, similarity_elapsed_time = asyncio.run(
             fetch_similarity_result(chain_manager, question)
         )
@@ -145,22 +222,28 @@ def update_similarity_results(n_clicks, question):
      Output("mmr-time", "children"),
      Output("mmr-usage-metadata", "children")],
     [Input("submit-button", "n_clicks")],
-    [State("question-input", "value")]
+    [State("question-input", "value"),
+     State("k-input-graph", "value"),
+     State("depth-input-graph", "value"),
+     State("lambda-slider", "value")]
 )
-def update_mmr_results(n_clicks, question):
+def update_mmr_results(n_clicks, question, k, depth, lambda_mult):
     """
     Updates the MMR results in the UI when the submit button is clicked.
 
     Parameters:
     n_clicks (int): The number of times the submit button has been clicked.
     question (str): The question input by the user.
+    k (int): The number of top results to retrieve.
+    depth (int): The depth of the graph traversal.
+    lambda_mult (float): The lambda multiplier for MMR.
 
     Returns:
     tuple: A tuple containing the MMR result, elapsed time, and usage metadata.
     """
     if n_clicks > 0:
         chain_manager = ChainManager()
-        chain_manager.setup_chains()
+        chain_manager.setup_chains(k=k, depth=depth, lambda_mult=lambda_mult)
         mmr_result, mmr_usage_metadata, mmr_elapsed_time = asyncio.run(
             fetch_mmr_result(chain_manager, question)
         )
@@ -182,4 +265,4 @@ def update_mmr_results(n_clicks, question):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=DEBUG_MODE)
+    app.run_server(debug=True)

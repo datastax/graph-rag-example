@@ -40,28 +40,39 @@ class ChainManager:
     def format_docs(self, docs):
         """
         Formats documents by concatenating their content.
+
+        Parameters:
+        docs (list): List of documents to format.
+
+        Returns:
+        str: Concatenated content of the documents.
         """
         return "\n\n".join(doc.page_content for doc in docs)
 
-    def setup_chains(self):
+    def setup_chains(self, k=10, depth=3, lambda_mult=0.25):
         """
         Sets up the similarity and traversal chains using the graph vector store.
         
         The similarity chain retrieves documents based on vector similarity,
         while the traversal chain retrieves documents based on graph traversal.
         Both chains format the retrieved documents and use a language model to generate responses.
+
+        Parameters:
+        k (int): The number of top results to retrieve.
+        depth (int): The depth of the graph traversal.
+        lambda_mult (float): The lambda multiplier for MMR.
         """
         self.similarity_retriever = knowledge_store.as_retriever(
             search_type="similarity", search_kwargs={
-                "k": 10, # Return the top results
+                "k": k, # Return the top results
                 "depth": 0,
             })
 
         self.mmr_retriever = knowledge_store.as_retriever(
             search_type="mmr_traversal", search_kwargs={
-                "k": 10, # top k results
-                "depth": 3,
-                "lambda_mult": 0.25, # 0 = more diverse, 1 = more relevant
+                "k": k, # top k results
+                "depth": depth,
+                "lambda_mult": lambda_mult, # 0 = more diverse, 1 = more relevant
                 #"fetch_k": 50
             })
 
@@ -83,6 +94,9 @@ async def get_similarity_result(chain_manager, question):
     Args:
         chain_manager (ChainManager): The chain manager instance.
         question (str): The question to be answered by the chain.
+
+    Returns:
+        tuple: A tuple containing the similarity result and usage metadata.
     """
     invoked_chain = chain_manager.similarity_chain.invoke(question)
     content = invoked_chain.content
@@ -99,7 +113,7 @@ async def get_mmr_result(chain_manager, question):
         question (str): The question to be answered by the chain.
     
     Returns:
-        tuple: A tuple containing the traversal result and the traversal path.
+        tuple: A tuple containing the MMR result and usage metadata.
     """
     invoked_chain = chain_manager.mmr_chain.invoke(question)
     content = invoked_chain.content

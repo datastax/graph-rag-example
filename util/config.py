@@ -23,7 +23,7 @@ load_dotenv()
 
 # Set debug mode, `True` will generate graphs in multiple
 # formats (dot, png, text) for use in analyzing results
-DEBUG_MODE=False
+DEBUG_MODE=True
 
 # Configure logger
 LOGGER = logging.getLogger(__name__)
