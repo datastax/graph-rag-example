@@ -18,7 +18,7 @@ from langchain_community.graph_vectorstores.extractors import (
     GLiNERLinkExtractor,
 )
 from langchain_community.document_transformers import BeautifulSoupTransformer
-from util.config import LOGGER, OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN
+from util.config import LOGGER, OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN, MOVIE_NODE_TABLE
 from util.scrub import clean_and_preprocess_documents
 from util.visualization import visualize_graph_text
 
@@ -27,7 +27,7 @@ embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=ASTRA_DB_ID, token=ASTRA_TOKEN)
-store = CassandraGraphVectorStore(embeddings)
+store = CassandraGraphVectorStore(embeddings, node_table=MOVIE_NODE_TABLE)
 
 
 def get_urls(num_items=10):

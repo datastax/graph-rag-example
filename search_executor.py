@@ -16,7 +16,7 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.graph_vectorstores import CassandraGraphVectorStore
-from util.config import OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN, ANSWER_PROMPT
+from util.config import OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN, MOVIE_NODE_TABLE, ANSWER_PROMPT
 
 # Initialize embeddings and LLM using OpenAI
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
@@ -24,7 +24,7 @@ llm = ChatOpenAI(temperature=1, model_name="gpt-4o-mini")
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=ASTRA_DB_ID, token=ASTRA_TOKEN)
-store = CassandraGraphVectorStore(embeddings)
+store = CassandraGraphVectorStore(embeddings, node_table=MOVIE_NODE_TABLE)
 
 class ChainManager:
     """

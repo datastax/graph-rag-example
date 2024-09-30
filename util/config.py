@@ -41,6 +41,8 @@ ASTRA_ENDPOINT = os.getenv("ASTRA_DB_ENDPOINT")
 if not all([ASTRA_DB_ID, ASTRA_TOKEN, ASTRA_ENDPOINT]):
     raise ValueError("Astra DB credentials must be set.")
 
+MOVIE_NODE_TABLE = "movie_graph"
+
 ANSWER_PROMPT = (
     "The original question is given below."
     "This question has been used to retrieve information from a vector store."
