@@ -37,9 +37,10 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = dbc.Container([
     dbc.Row([
-        dbc.Col(html.H1("Similarity vs MMR Comparison"), className="mb-4")
+        dbc.Col(html.H1("Similarity vs MMR Comparison"), className="mb-4 text-center")
     ]),
 
+    # User input and get results button
     dbc.Row([
         dbc.Col([
             dbc.Input(
@@ -47,100 +48,100 @@ app.layout = dbc.Container([
                 type="text",
                 value="",
                 placeholder="Ask me something",
-                className="mb-2"
+                className="input-field mb-2"
             )
         ], width=10),
         dbc.Col([
-            dbc.Button("Get Results", id="submit-button", n_clicks=0, color="primary", className="mb-2")
+            dbc.Button("Get Results", id="submit-button", n_clicks=0, color="primary", className="button mb-2")
         ], width=2)
-    ], className="mb-4"),
+    ], className="justify-content-center mb-4"),
 
     dbc.Row([
-        dbc.Col([
-            html.H2("Normal RAG", className="result-title"),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Label("Num Results:", className="input-label"),
-                ], width=4),
-                dbc.Col([
-                    dbc.Input(
-                        id="k-input-normal",
-                        type="number",
-                        value=10,
-                        placeholder="num_results",
-                        className="mb-2"
-                    )
-                ], width=8)
-            ], className="mb-4"),
+        dbc.Col([  # Normal RAG Section
+            dbc.Card([
+                dbc.CardHeader(html.H2("Normal RAG", className="result-title")),
+                dbc.CardBody([
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Label("Num Results", className="input-label"),
+                            dbc.Input(
+                                id="k-input-normal",
+                                type="number",
+                                value=10,
+                                placeholder="num_results",
+                                className="input-field small-input mb-2"
+                            )
+                        ])
+                    ], align="center"),
+                    dls.Hash(id="similarity-spinner", children=[
+                        dcc.Markdown(id="similarity-result", className="result-content"),
+                        html.Div(id="similarity-time", className="result-time"),
+                        html.Div(id="similarity-usage-metadata", className="usage-metadata")
+                    ], color="#4CAF50")
+                ])
+            ], className="result-container")
+        ], width=6),
 
-            dbc.Row([
-                dbc.Col([
-                    html.Div(id="placeholder"),
-                ], width=8)
-            ], className="mb-4"),
+        dbc.Col([  # Graph RAG Section
+            dbc.Card([
+                dbc.CardHeader(html.H2("Graph RAG", className="result-title")),
+                dbc.CardBody([
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Label("Num Results", className="input-label"),
+                            dbc.Input(
+                                id="k-input-graph",
+                                type="number",
+                                value=10,
+                                placeholder="num_results",
+                                className="input-field small-input mb-2"
+                            )
+                        ])
+                    ]),
 
-            dls.Hash(id="similarity-spinner", children=[
-                dcc.Markdown(id="similarity-result", className="result-content"),
-                html.Div(id="similarity-time", className="result-time"),
-                html.Div(id="similarity-usage-metadata", className="usage-metadata")
-            ], color="#4CAF50", speed_multiplier=1.5)
-        ], width=6, className="result-container"),
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Label("Depth", className="input-label"),
+                            dbc.Input(
+                                id="depth-input-graph",
+                                type="number",
+                                value=2,
+                                placeholder="depth",
+                                className="input-field small-input mb-2"
+                            )
+                        ])
+                    ]),
 
-        dbc.Col([
-            html.H2("Graph RAG", className="result-title"),
-            dbc.Row([
-                dbc.Col([
-                    dbc.Label("Num Results:", className="input-label"),
-                ], width=4),
-                dbc.Col([
-                    dbc.Input(
-                        id="k-input-graph",
-                        type="number",
-                        value=10,
-                        placeholder="num_results",
-                        className="mb-2"
-                    )
-                ], width=8)
-            ], className="mb-4"),
+                    dbc.Row([
+                        dbc.Col([
+                            dbc.Row([
+                                dbc.Col([
+                                    dbc.Label("Diverse", className="input-label", style={"text-align": "left"})
+                                ], width=6),
+                                dbc.Col([
+                                    dbc.Label("Relevant", className="input-label", style={"text-align": "right", "width": "100%"})
+                                ], width=6, className="d-flex justify-content-end")
+                            ]),
+                            dcc.Slider(
+                                id="lambda-slider",
+                                min=0,
+                                max=1,
+                                step=0.01,
+                                value=0.25,
+                                marks={i / 10: str(i / 10) for i in range(0, 11)},
+                                className="slider"
+                            ),
+                        ], width=12),
+                    ]),
 
-            dbc.Row([
-                dbc.Col([
-                    dbc.Label("Depth", className="input-label"),
-                ], width=4),
-                dbc.Col([
-                    dbc.Input(
-                        id="depth-input-graph",
-                        type="number",
-                        value=3,
-                        placeholder="depth",
-                        className="mb-2"
-                    )
-                ], width=8)
-            ], className="mb-4"),
-
-            dbc.Row([
-                dbc.Col([
-                    dbc.Label("Relevance", className="input-label"),
-                ], width=4),
-                dbc.Col([
-                    dcc.Slider(
-                        id="lambda-slider",
-                        min=0,
-                        max=1,
-                        step=0.01,
-                        value=0.25,
-                        marks={i / 10: str(i / 10) for i in range(0, 11)},
-                        className="slider"
-                    )
-                ], width=8)
-            ], className="mb-4"),
-
-            dls.Hash(id="mmr-spinner", children=[
-                dcc.Markdown(id="mmr-result", className="result-content"),
-                html.Div(id="mmr-time", className="result-time"),
-                html.Div(id="mmr-usage-metadata", className="usage-metadata")
-            ], color="#4CAF50", speed_multiplier=1.5)
-        ], width=6, className="result-container")
+                    dls.Hash(id="mmr-spinner", children=[
+                        dcc.Markdown(id="mmr-result", className="result-content"),
+                        html.Div(id="mmr-time", className="result-time"),
+                        html.Div(id="mmr-usage-metadata", className="usage-metadata")
+                    ], color="#4CAF50")
+                ])
+            ], className="result-container")
+        ], width=6)
     ])
 ], fluid=True)
 
@@ -251,7 +252,7 @@ def update_mmr_results(n_clicks, question, k, depth, lambda_mult):
         visualize_result = chain_manager.mmr_retriever.invoke(question)
 
         if DEBUG_MODE:
-            visualize_graphs(visualize_result)
+            #visualize_graphs(visualize_result)
             visualize_graph_text(visualize_result, direction="bidir")
 
         mmr_time = (

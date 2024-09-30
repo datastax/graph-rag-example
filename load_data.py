@@ -17,6 +17,7 @@ from langchain_community.graph_vectorstores.extractors import (
     KeybertLinkExtractor,
     GLiNERLinkExtractor,
 )
+from langchain_community.document_transformers import BeautifulSoupTransformer
 from util.config import LOGGER, OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN
 from util.scrub import clean_and_preprocess_documents
 from util.visualization import visualize_graph_text
@@ -26,7 +27,7 @@ embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=ASTRA_DB_ID, token=ASTRA_TOKEN)
-knowledge_store = CassandraGraphVectorStore(embeddings)
+store = CassandraGraphVectorStore(embeddings)
 
 
 def get_urls(num_items=10):
@@ -66,31 +67,33 @@ def main():
     """
     try:
         # Load and process documents
-        loader = AsyncHtmlLoader(get_urls(num_items=50))
-        raw_documents = loader.load()
+        loader = AsyncHtmlLoader(get_urls(num_items=10))
+        documents = loader.load()
 
         # Continue with the existing transformation and visualization
         transformer = LinkExtractorTransformer([
             HtmlLinkExtractor().as_document_extractor(),
-            KeybertLinkExtractor(),
+            #KeybertLinkExtractor(),
         ])
-        transformed_documents = transformer.transform_documents(raw_documents)
+        documents = transformer.transform_documents(documents)
 
         # Clean and preprocess documents using the new function
-        cleaned_documents = clean_and_preprocess_documents(transformed_documents)
+        #documents = clean_and_preprocess_documents(documents)
+        bs4_transfromer = BeautifulSoupTransformer()
+        documents = bs4_transfromer.transform_documents(documents)
 
         # Split documents into chunks
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1024,
-            chunk_overlap=64
+            chunk_overlap=64,
         )
-        documents = text_splitter.split_documents(cleaned_documents)
-        ner_extractor = GLiNERLinkExtractor(["Person", "Genre", "Location"])
+        documents = text_splitter.split_documents(documents)
+        ner_extractor = GLiNERLinkExtractor(["Genre", "Topic"])
         transformer = LinkExtractorTransformer([ner_extractor])
         documents = transformer.transform_documents(documents)
 
         # Add documents to the graph vector store
-        knowledge_store.add_documents(documents)
+        store.add_documents(documents)
 
         visualize_graph_text(documents)
 

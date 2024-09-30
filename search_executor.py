@@ -24,7 +24,7 @@ llm = ChatOpenAI(temperature=1, model_name="gpt-4o-mini")
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=ASTRA_DB_ID, token=ASTRA_TOKEN)
-knowledge_store = CassandraGraphVectorStore(embeddings)
+store = CassandraGraphVectorStore(embeddings)
 
 class ChainManager:
     """
@@ -62,13 +62,13 @@ class ChainManager:
         depth (int): The depth of the graph traversal.
         lambda_mult (float): The lambda multiplier for MMR.
         """
-        self.similarity_retriever = knowledge_store.as_retriever(
+        self.similarity_retriever = store.as_retriever(
             search_type="similarity", search_kwargs={
                 "k": k, # Return the top results
                 "depth": 0,
             })
 
-        self.mmr_retriever = knowledge_store.as_retriever(
+        self.mmr_retriever = store.as_retriever(
             search_type="mmr_traversal", search_kwargs={
                 "k": k, # top k results
                 "depth": depth,
