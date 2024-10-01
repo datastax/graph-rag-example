@@ -40,11 +40,12 @@ LOGGER.info(ASCII_ART)
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = dbc.Container([
+    # Title with background image
     dbc.Row([
-        dbc.Col(html.H1("Similarity vs MMR Comparison"), className="mb-4 text-center")
-    ]),
+        dbc.Col(html.H1("Similarity vs MMR Comparison", className="title-text"), className="text-center title-container")
+    ], className="align-items-center mb-4"),
 
-    # User input and get results button
+    # User input and get results button with background image
     dbc.Row([
         dbc.Col([
             dbc.Input(
@@ -58,7 +59,7 @@ app.layout = dbc.Container([
         dbc.Col([
             dbc.Button("Get Results", id="submit-button", n_clicks=0, color="primary", className="button mb-2")
         ], width=2)
-    ], className="justify-content-center mb-4"),
+    ], className="justify-content-center align-items-center mb-4 input-container"),
 
     dbc.Row([
         dbc.Col([  # Normal RAG Section
@@ -89,7 +90,11 @@ app.layout = dbc.Container([
 
         dbc.Col([  # Graph RAG Section
             dbc.Card([
-                dbc.CardHeader(html.H2("Graph RAG", className="result-title")),
+                dbc.CardHeader(
+                    dbc.Row([
+                        dbc.Col(html.H2("Graph RAG", className="result-title"), width="auto"),
+                    ], className="align-items-center")
+                ),
                 dbc.CardBody([
                     dbc.Row([
                         dbc.Col([
@@ -275,4 +280,4 @@ def update_mmr_results(n_clicks, question, k, depth, lambda_mult):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=8050)

@@ -14,8 +14,34 @@ h1 {
     padding: 20px 0;
 }
 
+.container-fluid {
+    min-width: 700px;
+}
+
 .card-body {
     min-height: 350px;
+}
+
+.input-container {
+    background-image: url('/assets/graph_header.png');
+    background-size: cover;
+    background-position: center;
+    padding: 20px;
+    border-radius: 10px; /* Optional: Add some border radius for better appearance */
+}
+
+.header-image {
+    height: 50px; /* Adjust the height as needed */
+}
+
+.title-text {
+    font-size: 2.5rem; /* Adjust the font size as needed */
+    color: white; /* Ensure the text is readable over the background image */
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000; /* Outline effect */
 }
 
 .input-field {
