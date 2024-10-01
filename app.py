@@ -42,8 +42,11 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 app.layout = dbc.Container([
     # Title with background image
     dbc.Row([
-        dbc.Col(html.H1("Similarity vs MMR Comparison", className="title-text"), className="text-center title-container")
-    ], className="align-items-center mb-4"),
+        dbc.Col([
+            html.Img(src="/assets/title.png", className="title-image"),
+            html.P("*no graph database needed", className="title-label")
+        ], className="text-center title-container")
+    ], className="align-items-center"),
 
     # User input and get results button with background image
     dbc.Row([
@@ -83,7 +86,7 @@ app.layout = dbc.Container([
                         dcc.Markdown(id="similarity-result", className="result-content"),
                         html.Div(id="similarity-time", className="result-time"),
                         html.Div(id="similarity-usage-metadata", className="usage-metadata")
-                    ], color="#4CAF50")
+                    ], color="#7BD1F5")
                 ])
             ], className="result-container")
         ], width=6),
@@ -148,7 +151,7 @@ app.layout = dbc.Container([
                         dcc.Markdown(id="mmr-result", className="result-content"),
                         html.Div(id="mmr-time", className="result-time"),
                         html.Div(id="mmr-usage-metadata", className="usage-metadata")
-                    ], color="#4CAF50")
+                    ], color="#7BD1F5")
                 ])
             ], className="result-container")
         ], width=6)
@@ -280,4 +283,4 @@ def update_mmr_results(n_clicks, question, k, depth, lambda_mult):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True, port=8050)
+    app.run_server(debug=True, port=8050, host='0.0.0.0')

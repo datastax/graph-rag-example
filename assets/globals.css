@@ -30,18 +30,18 @@ h1 {
     border-radius: 10px; /* Optional: Add some border radius for better appearance */
 }
 
-.header-image {
-    height: 50px; /* Adjust the height as needed */
+.title-container {
+    padding: 20px;
 }
 
-.title-text {
-    font-size: 2.5rem; /* Adjust the font size as needed */
-    color: white; /* Ensure the text is readable over the background image */
-    text-shadow: 
-        -1px -1px 0 #000,  
-         1px -1px 0 #000,
-        -1px  1px 0 #000,
-         1px  1px 0 #000; /* Outline effect */
+.title-image {
+    max-width: 100%; /* Ensure the image scales appropriately */
+    height: auto; /* Maintain aspect ratio */
+}
+
+.title-label {
+    font-size: 1rem; /* Adjust the font size as needed */
+    color: #ffffff; /* Ensure the text is readable */
 }
 
 .input-field {
