@@ -39,7 +39,12 @@ An example application that demonstrates how to use LangChain's [graph_vectorsto
 
 ## 🚀 Launch the App
 
-1. **Run the main script**:
+1. **Run the data loading script**:
+	```sh
+	python load_data.py
+	```
+
+2. **Run the main script**:
 	```sh
 	python app.py
 	```
