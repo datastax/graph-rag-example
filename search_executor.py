@@ -11,12 +11,16 @@ The main components of the module are:
 - Functions to get results from the similarity, traversal, and MMR chains.
 
 """
+import warnings
 import cassio
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.graph_vectorstores import CassandraGraphVectorStore
 from util.config import OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN, MOVIE_NODE_TABLE, ANSWER_PROMPT
+
+# Suppress all of the Langchain beta and other warnings
+warnings.filterwarnings("ignore", lineno=0)
 
 # Initialize embeddings and LLM using OpenAI
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)

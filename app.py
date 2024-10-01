@@ -4,6 +4,7 @@ It includes functions for fetching results asynchronously and updating the UI wi
 """
 import time
 import asyncio
+import warnings
 import dash
 import dash_bootstrap_components as dbc
 from dash import dcc, html
@@ -16,9 +17,12 @@ from search_executor import (
 )
 from util.visualization import (
     visualize_graph_text,
-    visualize_graphs
+    #visualize_graphs
 )
 from util.config import LOGGER, DEBUG_MODE
+
+# Suppress all of the Langchain beta and other warnings
+warnings.filterwarnings("ignore", lineno=0)
 
 # ASCII art to be logged at the start of the app
 ASCII_ART = """
@@ -63,11 +67,12 @@ app.layout = dbc.Container([
                 dbc.CardBody([
                     dbc.Row([
                         dbc.Col([
-                            dbc.Label("Num Results", className="input-label"),
+                            dbc.Label("Num Results:", className="input-label", style={"textAlign": "left", "width": "30%"}),
+                            dbc.Label("Number of documents to return", className="input-label", style={"textAlign": "right", "width": "70%"}),
                             dbc.Input(
                                 id="k-input-normal",
                                 type="number",
-                                value=10,
+                                value=4,
                                 placeholder="num_results",
                                 className="input-field small-input mb-2"
                             )
@@ -92,7 +97,7 @@ app.layout = dbc.Container([
                             dbc.Input(
                                 id="k-input-graph",
                                 type="number",
-                                value=10,
+                                value=4,
                                 placeholder="num_results",
                                 className="input-field small-input mb-2"
                             )
@@ -116,10 +121,10 @@ app.layout = dbc.Container([
                         dbc.Col([
                             dbc.Row([
                                 dbc.Col([
-                                    dbc.Label("Diverse", className="input-label", style={"text-align": "left"})
+                                    dbc.Label("Diverse", className="input-label", style={"textAlign": "left"})
                                 ], width=6),
                                 dbc.Col([
-                                    dbc.Label("Relevant", className="input-label", style={"text-align": "right", "width": "100%"})
+                                    dbc.Label("Relevant", className="input-label", style={"textAlign": "right", "width": "100%"})
                                 ], width=6, className="d-flex justify-content-end")
                             ]),
                             dcc.Slider(
@@ -250,6 +255,9 @@ def update_mmr_results(n_clicks, question, k, depth, lambda_mult):
         )
 
         visualize_result = chain_manager.mmr_retriever.invoke(question)
+        for result in visualize_result:
+            print(f"\n\n {result.metadata.get('source')}")
+            print(f"\n\n {result.metadata}")
 
         if DEBUG_MODE:
             #visualize_graphs(visualize_result)

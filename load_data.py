@@ -3,10 +3,11 @@ This script loads, processes, and visualizes documents from a list of URLs.
 It includes functions for fetching URLs, cleaning and preprocessing documents,
 and adding them to a graph vector store.
 """
-
 import os
 import json
+import warnings
 import cassio
+
 from langchain_openai import OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import AsyncHtmlLoader
@@ -18,9 +19,13 @@ from langchain_community.graph_vectorstores.extractors import (
     GLiNERLinkExtractor,
 )
 from langchain_community.document_transformers import BeautifulSoupTransformer
+
 from util.config import LOGGER, OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN, MOVIE_NODE_TABLE
 from util.scrub import clean_and_preprocess_documents
 from util.visualization import visualize_graph_text
+
+# Suppress all of the Langchain beta and other warnings
+warnings.filterwarnings("ignore", lineno=0)
 
 # Initialize embeddings and LLM using OpenAI
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
@@ -67,7 +72,7 @@ def main():
     """
     try:
         # Load and process documents
-        loader = AsyncHtmlLoader(get_urls(num_items=10))
+        loader = AsyncHtmlLoader(get_urls(num_items=20))
         documents = loader.load()
 
         # Continue with the existing transformation and visualization
@@ -79,6 +84,10 @@ def main():
 
         # Clean and preprocess documents using the new function
         #documents = clean_and_preprocess_documents(documents)
+
+        # The bs4 transformer is very capable and provides better content, but
+        # it is much slower than the clean_and_preprocess_documents function used above.
+        # For larger sets of documents, I tend to use the clean_and_preprocess_documents function.
         bs4_transfromer = BeautifulSoupTransformer()
         documents = bs4_transfromer.transform_documents(documents)
 
