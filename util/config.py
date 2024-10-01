@@ -49,6 +49,7 @@ ANSWER_PROMPT = (
     "The matching results are shown below."
     "Only use context to answer the question."
     "Do not hallucinate or generate new information."
+    "Do not include images or links in your output."
     "If you cannot answer the question based on the context say so, "
         "let them know to search on movie related items."
     "Use the information in the results to answer the original question."

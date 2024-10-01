@@ -22,7 +22,7 @@ from util.visualization import (
 from util.config import LOGGER, DEBUG_MODE
 
 # Suppress all of the Langchain beta and other warnings
-warnings.filterwarnings("ignore", lineno=0)
+#warnings.filterwarnings("ignore", lineno=0)
 
 # ASCII art to be logged at the start of the app
 ASCII_ART = """
@@ -72,7 +72,7 @@ app.layout = dbc.Container([
                             dbc.Input(
                                 id="k-input-normal",
                                 type="number",
-                                value=4,
+                                value=6,
                                 placeholder="num_results",
                                 className="input-field small-input mb-2"
                             )
@@ -97,7 +97,7 @@ app.layout = dbc.Container([
                             dbc.Input(
                                 id="k-input-graph",
                                 type="number",
-                                value=4,
+                                value=6,
                                 placeholder="num_results",
                                 className="input-field small-input mb-2"
                             )
@@ -132,7 +132,7 @@ app.layout = dbc.Container([
                                 min=0,
                                 max=1,
                                 step=0.01,
-                                value=0.25,
+                                value=0.75,
                                 marks={i / 10: str(i / 10) for i in range(0, 11)},
                                 className="slider"
                             ),
@@ -254,12 +254,13 @@ def update_mmr_results(n_clicks, question, k, depth, lambda_mult):
             fetch_mmr_result(chain_manager, question)
         )
 
-        visualize_result = chain_manager.mmr_retriever.invoke(question)
-        for result in visualize_result:
-            print(f"\n\n {result.metadata.get('source')}")
-            print(f"\n\n {result.metadata}")
-
         if DEBUG_MODE:
+            visualize_result = chain_manager.mmr_retriever.invoke(question)
+
+            for result in visualize_result:
+                print(f"\n\n {result.metadata.get('source')}")
+                print(f"\n\n {result.metadata}")
+
             #visualize_graphs(visualize_result)
             visualize_graph_text(visualize_result, direction="bidir")
 

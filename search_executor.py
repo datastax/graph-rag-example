@@ -20,11 +20,11 @@ from langchain_community.graph_vectorstores import CassandraGraphVectorStore
 from util.config import OPENAI_API_KEY, ASTRA_DB_ID, ASTRA_TOKEN, MOVIE_NODE_TABLE, ANSWER_PROMPT
 
 # Suppress all of the Langchain beta and other warnings
-warnings.filterwarnings("ignore", lineno=0)
+#warnings.filterwarnings("ignore", lineno=0)
 
 # Initialize embeddings and LLM using OpenAI
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
-llm = ChatOpenAI(temperature=1, model_name="gpt-4o-mini")
+llm = ChatOpenAI(temperature=1, model_name="gpt-4o")
 
 # Initialize Astra connection using Cassio
 cassio.init(database_id=ASTRA_DB_ID, token=ASTRA_TOKEN)
@@ -77,7 +77,7 @@ class ChainManager:
                 "k": k, # top k results
                 "depth": depth,
                 "lambda_mult": lambda_mult, # 0 = more diverse, 1 = more relevant
-                #"fetch_k": 50
+                "fetch_k": 50
             })
 
         self.similarity_chain = (

@@ -14,6 +14,10 @@ h1 {
     padding: 20px 0;
 }
 
+.card-body {
+    min-height: 350px;
+}
+
 .input-field {
     background-color: #202020;
     border: 1px solid #3a3a3a;
@@ -82,4 +86,8 @@ h1 {
 
 .slider .rc-slider-handle {
     border-color: #1a73e8;
+}
+
+#similarity-result {
+    margin-top: 162px;
 }

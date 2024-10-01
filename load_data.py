@@ -72,39 +72,46 @@ def main():
     """
     try:
         # Load and process documents
-        loader = AsyncHtmlLoader(get_urls(num_items=20))
+        loader = AsyncHtmlLoader(get_urls(num_items=50))
         documents = loader.load()
 
-        # Continue with the existing transformation and visualization
-        transformer = LinkExtractorTransformer([
-            HtmlLinkExtractor().as_document_extractor(),
-            #KeybertLinkExtractor(),
-        ])
-        documents = transformer.transform_documents(documents)
+        # Process documents in chunks of 10
+        chunk_size = 10
+        for i in range(0, len(documents), chunk_size):
+            print(f"Processing documents {i + 1} to {i + chunk_size}...")
+            document_chunk = documents[i:i + chunk_size]
 
-        # Clean and preprocess documents using the new function
-        #documents = clean_and_preprocess_documents(documents)
+            # Continue with the existing transformation and visualization
+            transformer = LinkExtractorTransformer([
+                #HtmlLinkExtractor().as_document_extractor(),
+                KeybertLinkExtractor(),
+            ])
+            document_chunk = transformer.transform_documents(document_chunk)
 
-        # The bs4 transformer is very capable and provides better content, but
-        # it is much slower than the clean_and_preprocess_documents function used above.
-        # For larger sets of documents, I tend to use the clean_and_preprocess_documents function.
-        bs4_transfromer = BeautifulSoupTransformer()
-        documents = bs4_transfromer.transform_documents(documents)
+            # Clean and preprocess documents using the new function
+            document_chunk = clean_and_preprocess_documents(document_chunk)
 
-        # Split documents into chunks
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1024,
-            chunk_overlap=64,
-        )
-        documents = text_splitter.split_documents(documents)
-        ner_extractor = GLiNERLinkExtractor(["Genre", "Topic"])
-        transformer = LinkExtractorTransformer([ner_extractor])
-        documents = transformer.transform_documents(documents)
+            # The bs4 transformer is very capable and provides better content, but
+            # it is much slower than the clean_and_preprocess_documents function used above.
+            # For larger sets of documents, I tend to use the clean_and_preprocess_documents function.
+            #bs4_transformer = BeautifulSoupTransformer()
+            #document_chunk = bs4_transformer.transform_documents(document_chunk)
 
-        # Add documents to the graph vector store
-        store.add_documents(documents)
+            # Split documents into chunks
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1024,
+                chunk_overlap=64,
+            )
+            document_chunk = text_splitter.split_documents(document_chunk)
+            ner_extractor = GLiNERLinkExtractor(["Genre", "Topic"])
+            transformer = LinkExtractorTransformer([ner_extractor])
+            document_chunk = transformer.transform_documents(document_chunk)
 
-        visualize_graph_text(documents)
+            # Add documents to the graph vector store
+            store.add_documents(document_chunk)
+
+            # Visualize the graph text for the current chunk
+            visualize_graph_text(document_chunk)
 
     except Exception as e:
         LOGGER.error("An error occurred: %s", e)
