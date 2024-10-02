@@ -101,6 +101,18 @@ h1 {
     font-size: 14px;
 }
 
+.result-link {
+    font-size: 22px; /* Adjust the font size as needed */
+    color: #1a73e8; /* Ensure the text is readable and styled as a hyperlink */
+    text-decoration: none; /* Remove underline */
+    margin-left: 15px; /* Add some space between the title and the link */
+    margin-bottom: 16px;
+}
+
+.result-link:hover {
+    text-decoration: underline; /* Add underline on hover */
+}
+
 .dcc-Slider {
     margin-bottom: 24px;
     background-color: transparent;

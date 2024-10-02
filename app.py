@@ -19,7 +19,7 @@ from util.visualization import (
     visualize_graph_text,
     #visualize_graphs
 )
-from util.config import LOGGER, DEBUG_MODE
+from util.config import LOGGER, DEBUG_MODE, SIMILARITY_SEARCH_URL, SIMILARITY_MMR_SEARCH_URL
 
 # Suppress all of the Langchain beta and other warnings
 #warnings.filterwarnings("ignore", lineno=0)
@@ -67,7 +67,21 @@ app.layout = dbc.Container([
     dbc.Row([
         dbc.Col([  # Normal RAG Section
             dbc.Card([
-                dbc.CardHeader(html.H2("Normal RAG", className="result-title")),
+                dbc.CardHeader(
+                    dbc.Row([
+                        dbc.Col([
+                            html.Div([
+                                html.H2("Normal RAG: ", className="result-title"),
+                                dcc.Link(
+                                    "similarity", 
+                                    href=SIMILARITY_SEARCH_URL,
+                                    className="result-link",
+                                    target="_blank"
+                                )
+                            ], className="d-flex align-items-center")
+                        ], width="auto")
+                    ], className="align-items-center")
+                ),
                 dbc.CardBody([
                     dbc.Row([
                         dbc.Col([
@@ -76,7 +90,7 @@ app.layout = dbc.Container([
                             dbc.Input(
                                 id="k-input-normal",
                                 type="number",
-                                value=6,
+                                value=10,
                                 placeholder="num_results",
                                 className="input-field small-input mb-2"
                             )
@@ -95,7 +109,17 @@ app.layout = dbc.Container([
             dbc.Card([
                 dbc.CardHeader(
                     dbc.Row([
-                        dbc.Col(html.H2("Graph RAG", className="result-title"), width="auto"),
+                        dbc.Col([
+                            html.Div([
+                                html.H2("Graph RAG: ", className="result-title"),
+                                dcc.Link(
+                                    "similarity + mmr", 
+                                    href=SIMILARITY_MMR_SEARCH_URL,
+                                    className="result-link",
+                                    target="_blank"
+                                )
+                            ], className="d-flex align-items-center")
+                        ], width="auto")
                     ], className="align-items-center")
                 ),
                 dbc.CardBody([
@@ -105,7 +129,7 @@ app.layout = dbc.Container([
                             dbc.Input(
                                 id="k-input-graph",
                                 type="number",
-                                value=6,
+                                value=10,
                                 placeholder="num_results",
                                 className="input-field small-input mb-2"
                             )
