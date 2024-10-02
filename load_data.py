@@ -72,7 +72,7 @@ def main():
     """
     try:
         # Load and process documents
-        loader = AsyncHtmlLoader(get_urls(num_items=1000))
+        loader = AsyncHtmlLoader(get_urls(num_items=20))
         documents = loader.load()
 
         # Process documents in chunks of 10

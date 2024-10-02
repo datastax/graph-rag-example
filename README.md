@@ -37,19 +37,25 @@ An example application that demonstrates how to use LangChain's [graph_vectorsto
 	  ```
 	- Fill in the required environment variables in the `.env` file.
 
+	Once you have your .env ready, create a [DataStax Astra Vector database](https://docs.datastax.com/en/astra-db-serverless/get-started/quickstart.html) if you don't already have one and copy the database ID, API endpoint, and an application token from the database overview page. Everything you need will be there.
+
+	You also need an [OpenAI API key](https://platform.openai.com/api-keys) to power the LLM responsible for giving responses.
+
 ## 🚀 Launch the App
+
 
 1. **Run the data loading script**:
 	```sh
 	python load_data.py
 	```
+	*load_data.py pulls data from [www.themoviedb.org](www.themoviedb.org) and extracts page content and metadata used in the graph.*
 
 2. **Run the main script**:
 	```sh
 	python app.py
 	```
+	*app.py displays a [Dash](https://dash.plotly.com/) based UI that allows a real-time comparison between both similarity and traversal based searches using graph RAG.*
 
-This will start the application, scrape the specified URLs, process the content, and perform vector similarity and graph traversal searches.
 
 ## 📜 License
 
